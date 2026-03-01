@@ -1,0 +1,66 @@
+○DB設計
+　■論理設計（概念スキーマ）
+　　○エンティティ
+　　　①ユーザー
+　　　　・ユーザーID（PK）
+　　　　・ユーザー名
+　　　　・メールアドレス
+　　　　　※変更の可能性があるため、PKにはしない
+　　　
+　　　★マジックリンクトークン管理（メールの遅延による不便さを防ぐため、ユーザー設定によって認証OFFも可能としたい）
+　　　　⇒一次情報なのでRedisを使ったほうが余計な情報をDB管理しなくてよく、データも消えるのでよさそう
+　　　　・UUID（トークン）（PK）
+　　　　　※ハッシュ化して保存
+　　　　・ユーザーID（FK）
+　　　　(・)有効期限
+　　　　⇒RedisならTTL設定のみでOK
+　　　　・使用済み日時
+　　　　⇒Redisなら勝手に削除されるのでOK
+　　　　・発行日時
+　　　　⇒Redisなら管理不要
+　　　　
+　　　②タスク
+　　　　・ユーザーID（FK）
+　　　　・タスクID（PK）
+　　　　・タスク名
+　　　　・タスクの色
+　　　　
+　　　　
+　　　③作業時間
+　　　　・作業ID（PK）
+　　　　・タスクID（FK）
+　　　　・作業開始時刻
+　　　　　※UTCで保存し、アプリケーションで表示する際に日本ならJSTに変換する
+　　　　・作業終了時刻 ※開始時刻と同様
+　　　　
+　　　　
+　■物理設計（内部スキーマ）
+　　○テーブル定義
+　　　①user（ユーザー）
+　　　　・user_id（PK）
+　　　　　※数字の連番にする予定
+　　　　・user_name
+　　　　・mail_address
+　　　　・created_at
+　　　　　※監査用の登録日時
+　　　　・updated_at
+　　　　　※監査用の更新日時
+　　　②task（タスク）
+　　　　・user_id（PK、FK）
+　　　　・task_id（PK）
+　　　　・task_name
+　　　　・task_color
+　　　　・created_at
+　　　　　※監査用の登録日時
+　　　　・updated_at
+　　　　　※監査用の更新日時
+　　　　
+　　　③work_time（作業時間）
+　　　　・work_id（PK）
+　　　　・task_id（FK）
+　　　　・work_start_time
+　　　　・work_end_time
+　　　　・created_at
+　　　　　※監査用の登録日時
+　　　　・updated_at
+　　　　　※監査用の更新日時
